@@ -1,0 +1,111 @@
+### 1) Login ADMIN
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "Vet2026*"
+}
+
+### Copia el token de la respuesta en la variable de abajo
+@token = PEGA_AQUI_EL_TOKEN
+
+### 2) Usuario actual
+GET http://localhost:8080/api/v1/auth/me
+Authorization: Bearer {{token}}
+
+### 3) Listar propietarios
+GET http://localhost:8080/api/v1/propietarios
+Authorization: Bearer {{token}}
+
+### 4) Listar prestaciones
+GET http://localhost:8080/api/v1/prestaciones
+Authorization: Bearer {{token}}
+
+### 5) Listar mascotas
+GET http://localhost:8080/api/v1/mascotas
+Authorization: Bearer {{token}}
+
+### 6) Registrar atención con descuento de 10% (tres prestaciones)
+POST http://localhost:8080/api/v1/atenciones
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "mascotaId": 1,
+  "peso": 18.50,
+  "diagnostico": "Control general y vacunación",
+  "detalles": [
+    { "prestacionId": 1, "cantidad": 1 },
+    { "prestacionId": 2, "cantidad": 1 },
+    { "prestacionId": 4, "cantidad": 1 }
+  ]
+}
+
+### 7) Consultar atenciones con filtros combinables
+GET http://localhost:8080/api/v1/atenciones?especie=PERRO&estado=REGISTRADA
+Authorization: Bearer {{token}}
+
+### 8) Reporte agregado por especie
+GET http://localhost:8080/api/v1/reportes/atenciones-por-especie
+Authorization: Bearer {{token}}
+
+### 9) Intentar registrar una prestación incompatible con la especie (debe responder 409)
+POST http://localhost:8080/api/v1/atenciones
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "mascotaId": 1,
+  "peso": 18.50,
+  "diagnostico": "Prueba de incompatibilidad",
+  "detalles": [
+    { "prestacionId": 1, "cantidad": 1 },
+    { "prestacionId": 3, "cantidad": 1 }
+  ]
+}
+
+### 10) Iniciar sesión como RECEPCIONISTA para comprobar permisos
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "recepcion",
+  "password": "Vet2026*"
+}
+
+### Sustituye por el token de recepcionista
+@tokenRecepcion = PEGA_AQUI_EL_TOKEN_DE_RECEPCION
+
+### 11) El recepcionista no puede consultar el reporte (403)
+GET http://localhost:8080/api/v1/reportes/atenciones-por-especie
+Authorization: Bearer {{tokenRecepcion}}
+
+### 12) Sin token debe responder 401
+GET http://localhost:8080/api/v1/mascotas
+
+### 13) Iniciar sesión como VETERINARIO
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "veterinario",
+  "password": "Vet2026*"
+}
+
+### Sustituye por el token de veterinario
+@tokenVeterinario = PEGA_AQUI_EL_TOKEN_DE_VETERINARIO
+
+### 14) El veterinario no puede registrar una mascota (403)
+POST http://localhost:8080/api/v1/mascotas
+Authorization: Bearer {{tokenVeterinario}}
+Content-Type: application/json
+
+{
+  "nombre": "Prueba",
+  "especie": "PERRO",
+  "raza": "Mestizo",
+  "fechaNacimiento": "2024-01-01",
+  "sexo": "M",
+  "propietarioId": 1
+}
